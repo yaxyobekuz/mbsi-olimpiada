@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>O'quvchilar reytingi</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #3b82f6;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --gold: #fbbf24;
+      --silver: #cbd5e1;
+      --bronze: #d97706;
+      --border: #334155;
+      --danger: #ef4444;
+      --ok: #22c55e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px 14px 40px;
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 1.6rem; margin-bottom: 4px; }
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 22px;
+      font-size: 0.9rem;
+    }
+
+    /* --- Yuklanish / xabar holatlari --- */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 38px; height: 38px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- Obuna gate --- */
+    .gate-icon { font-size: 3rem; text-align: center; margin-bottom: 8px; }
+    .gate-text {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .channel-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .channel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .channel-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .channel-status {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; flex-shrink: 0;
+    }
+    .channel-status.yes { background: var(--ok); color: #052e16; }
+    .channel-status.no { background: #475569; color: var(--muted); }
+    .channel-name { font-weight: 600; font-size: 0.95rem; }
+    .channel-name small { display: block; color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+    .btn {
+      border: none;
+      border-radius: 9px;
+      padding: 9px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .btn:active { opacity: 0.7; }
+    .btn-join { background: var(--accent); color: #fff; }
+    .btn-check {
+      background: var(--ok);
+      color: #052e16;
+      width: 100%;
+      padding: 13px;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .btn-joined { background: transparent; color: var(--ok); cursor: default; }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      font-size: 0.9rem;
+      margin: 20px 0;
+    }
+
+    /* --- Reyting (mavjud dizayn) --- */
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 16px; align-items: center;
+    }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab {
+      background: var(--card); color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 16px; border-radius: 8px;
+      cursor: pointer; font-size: 0.9rem; transition: all 0.15s;
+    }
+    .tab:hover { border-color: var(--accent); }
+    .tab.active {
+      background: var(--accent); border-color: var(--accent);
+      color: #fff; font-weight: 600;
+    }
+    .search {
+      flex: 1; min-width: 200px;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 9px 14px;
+      border-radius: 8px; font-size: 0.9rem; outline: none;
+    }
+    .search:focus { border-color: var(--accent); }
+    .stats { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      background: var(--card); border-radius: 12px; overflow: hidden;
+    }
+    thead th {
+      background: #15203a; padding: 12px 10px;
+      font-size: 0.82rem; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--muted); text-align: center;
+    }
+    thead th:nth-child(2) { text-align: left; }
+    tbody td {
+      padding: 11px 10px; border-top: 1px solid var(--border);
+      text-align: center; font-size: 0.95rem;
+    }
+    tbody td:nth-child(2) { text-align: left; font-weight: 500; }
+    tbody tr:hover { background: #25344f; }
+    tbody tr.highlight { background: rgba(59, 130, 246, 0.18); }
+
+    .rank {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 50%;
+      font-weight: 700; font-size: 0.85rem;
+    }
+    .rank-1 { background: var(--gold); color: #422006; }
+    .rank-2 { background: var(--silver); color: #1e293b; }
+    .rank-3 { background: var(--bronze); color: #fff; }
+    .rank-other { color: var(--muted); }
+    .ball { font-weight: 700; color: var(--accent); }
+    .empty { text-align: center; padding: 40px; color: var(--muted); }
+
+    @media (max-width: 560px) {
+      thead th, tbody td { padding: 8px 5px; font-size: 0.8rem; }
+      .col-hide { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏆 O'quvchilar reytingi</h1>
+    <p class="subtitle">MBSI olimpiada natijalari</p>
+
+    <!-- 1. Yuklanish ekrani -->
+    <div class="screen active" id="screen-loading">
+      <div class="loading">
+        <div class="spinner"></div>
+        Tekshirilmoqda...
+      </div>
+    </div>
+
+    <!-- 2. Obuna gate ekrani -->
+    <div class="screen" id="screen-gate">
+      <div class="gate-icon">🔒</div>
+      <p class="gate-text">
+        Farzandingiz reytingini ko'rish uchun quyidagi kanallarimizga
+        obuna bo'lishingiz kerak:
+      </p>
+      <div class="channel-list" id="channel-list"></div>
+      <button class="btn btn-check" id="btn-recheck">✅ Tekshirish</button>
+    </div>
+
+    <!-- 3. Xato ekrani -->
+    <div class="screen" id="screen-error">
+      <div class="error-box" id="error-message"></div>
+    </div>
+
+    <!-- 4. Reyting ekrani -->
+    <div class="screen" id="screen-ratings">
+      <div class="controls">
+        <div class="tabs" id="tabs"></div>
+        <input type="text" class="search" id="search" placeholder="🔍 Ism bo'yicha qidirish..." />
+      </div>
+      <p class="stats" id="stats"></p>
+      <table>
+        <thead>
+          <tr>
+            <th>O'rin</th>
+            <th>Ism Familiya</th>
+            <th class="col-hide">Matematika</th>
+            <th class="col-hide">Ingliz tili</th>
+            <th>Ball</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+
+    // --- Ekran almashtirish yordamchisi ---
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+    function showError(msg) {
+      document.getElementById("error-message").innerHTML = "❌ " + msg;
+      showScreen("screen-error");
+    }
+
+    // --- Telegram WebApp ni sozlash ---
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // Telegram tasdiqlash uchun initData (imzolangan satr)
+    const initData = tg?.initData || "";
+
+    // ===================================================================
+    //  OBUNA TEKSHIRUVI
+    // ===================================================================
+    async function checkSubscription() {
+      showScreen("screen-loading");
+
+      if (!initData) {
+        showError("Mini App ni Telegram ilovasi orqali oching.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/check-subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData }),
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          showError(data.error || "Tekshirishda xato yuz berdi.");
+          return;
+        }
+
+        if (data.subscribed) {
+          loadRatings();
+        } else {
+          renderGate(data.channels);
+        }
+      } catch (err) {
+        showError("Serverga ulanib bo'lmadi. Internetni tekshiring.");
+      }
+    }
+
+    // --- Obuna gate'ini chizish ---
+    function renderGate(channels) {
+      const list = document.getElementById("channel-list");
+      list.innerHTML = channels.map(ch => `
+        <div class="channel">
+          <div class="channel-info">
+            <div class="channel-status ${ch.subscribed ? "yes" : "no"}">
+              ${ch.subscribed ? "✓" : "•"}
+            </div>
+            <div class="channel-name">
+              ${escapeHtml(ch.title)}
+              <small>@${escapeHtml(ch.username)}</small>
+            </div>
+          </div>
+          ${ch.subscribed
+            ? `<button class="btn btn-joined">Obuna ✓</button>`
+            : `<button class="btn btn-join" data-url="${ch.url}">Obuna bo'lish</button>`}
+        </div>
+      `).join("");
+
+      // "Obuna bo'lish" tugmalari — kanalni Telegram ichida ochish
+      list.querySelectorAll(".btn-join").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const url = btn.dataset.url;
+          if (tg?.openTelegramLink) tg.openTelegramLink(url);
+          else window.open(url, "_blank");
+        });
+      });
+
+      showScreen("screen-gate");
+    }
+
+    // "Tekshirish" tugmasi
+    document.getElementById("btn-recheck").addEventListener("click", checkSubscription);
+
+    // ===================================================================
+    //  REYTING
+    // ===================================================================
+    let allStudents = [];
+    let currentSinf = "Barchasi";
+    let searchTerm = "";
+
+    async function loadRatings() {
+      showScreen("screen-loading");
+      try {
+        const res = await fetch("/api/ratings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData }),
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          // Obuna bekor qilingan bo'lsa — qayta tekshirishga qaytaramiz
+          showError(data.error || "Reytinglarni yuklab bo'lmadi.");
+          return;
+        }
+
+        allStudents = data.ratings;
+        initTabs();
+        render();
+        showScreen("screen-ratings");
+      } catch (err) {
+        showError("Serverga ulanib bo'lmadi.");
+      }
+    }
+
+    function initTabs() {
+      const sinflar = ["Barchasi", ...new Set(allStudents.map(s => s.sinf))];
+      const tabsEl = document.getElementById("tabs");
+      tabsEl.innerHTML = sinflar
+        .map(s => `<button class="tab${s === currentSinf ? " active" : ""}" data-sinf="${escapeHtml(s)}">${escapeHtml(s)}</button>`)
+        .join("");
+      tabsEl.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentSinf = btn.dataset.sinf;
+          tabsEl.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          render();
+        });
+      });
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      searchTerm = e.target.value.toLowerCase().trim();
+      render();
+    });
+
+    function render() {
+      let list = allStudents;
+
+      if (currentSinf !== "Barchasi") {
+        list = list.filter(s => s.sinf === currentSinf);
+      }
+      if (searchTerm) {
+        list = list.filter(s => s.ism.toLowerCase().includes(searchTerm));
+      }
+      list = [...list].sort((a, b) => b.ball - a.ball);
+
+      const tbody = document.getElementById("tbody");
+      const stats = document.getElementById("stats");
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty">Hech narsa topilmadi 🤷</td></tr>`;
+        stats.textContent = "";
+        return;
+      }
+
+      stats.textContent = `${list.length} ta o'quvchi ko'rsatilmoqda`;
+
+      tbody.innerHTML = list.map((s, i) => {
+        const rank = i + 1;
+        const rankClass = rank <= 3 ? `rank-${rank}` : "rank-other";
+        const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "";
+        // Qidiruv natijasi bo'lsa — qatorni ajratib ko'rsatamiz
+        const hl = searchTerm ? " highlight" : "";
+        return `
+          <tr class="${hl.trim()}">
+            <td><span class="rank ${rankClass}">${rank}</span></td>
+            <td>${medal} ${escapeHtml(s.ism)}
+                <span style="color:var(--muted);font-size:0.8rem">· ${escapeHtml(s.sinf)}</span></td>
+            <td class="col-hide">${s.matematika}</td>
+            <td class="col-hide">${s.ingliz}</td>
+            <td class="ball">${s.ball}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = String(text ?? "");
+      return div.innerHTML;
+    }
+
+    // --- Ishni boshlash ---
+    checkSubscription();
+  </script>
+</body>
+</html>
