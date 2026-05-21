@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O'quvchilar reytingi</title>
   <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+  <script>
+    // MUHIM: Mini App'ni IMKON QADAR ERTA tayyor deb belgilaymiz.
+    // telegram-web-app.js yuklanishi bilanoq, sahifaning qolgan qismi
+    // (shriftlar, CSS) yuklanishini KUTMASDAN ranglarni o'rnatamiz.
+    // Aks holda Telegram yuklanish paytida qora bo'sh ekran ko'rsatadi.
+    (function () {
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (!tg) return;
+      try { tg.setHeaderColor("#2563eb"); } catch (e) {}
+      try { tg.setBackgroundColor("#f1f5f9"); } catch (e) {}
+      // ready() ni darhol chaqiramiz — Telegram qora ekranni olib tashlaydi
+      try { tg.ready(); } catch (e) {}
+      try { tg.expand(); } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -26,6 +41,8 @@
       --ok: #16a34a;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* html va body bir xil fonда — yuklanish paytида qora/oq tasma chiqmaydi */
+    html { background: #f1f5f9; }
     body {
       font-family: "Inter", "Segoe UI", Tahoma, system-ui, sans-serif;
       background: var(--bg);
@@ -424,17 +441,13 @@
     }
 
     // --- Telegram WebApp ni sozlash ---
+    // ready()/expand()/ranglar <head> dagi inline skriptда allaqachon
+    // chaqirilgan (qora ekran muammosini oldini olish uchun). Bu yerda
+    // faqat sahifa elementlariga bog'liq sozlamalar qoladi.
     if (tg) {
-      tg.ready();
-      tg.expand();
-
       // Telegram ichida ekanini belgilaymiz — HTML "orqaga" tugmalari
       // yashiriladi, ularning o'rniga native BackButton ishlaydi.
       document.body.classList.add("tg-inside");
-
-      // Mini App header'ini har doim ko'k rangga bo'yaymiz
-      try { tg.setHeaderColor("#2563eb"); } catch (e) {}
-      // (eski Telegram versiyalarida bevosita rang qo'llab-quvvatlanmasligi mumkin)
 
       // Telegram BackButton bosilganda — bir qadam orqaga qaytamiz
       tg.BackButton?.onClick(() => {
