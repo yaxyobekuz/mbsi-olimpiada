@@ -20,6 +20,17 @@
       try { tg.expand(); } catch (e) {}
     })();
 
+    // Sahifa to'liq yuklangach WebView'ni bir marta repaint qilamiz —
+    // ba'zан WebView birinchi kadrni chizmay "oq" qoladi.
+    window.addEventListener("load", function () {
+      requestAnimationFrame(function () {
+        document.body.style.opacity = "0.999";
+        requestAnimationFrame(function () {
+          document.body.style.opacity = "";
+        });
+      });
+    });
+
     // Global xato ushlagich — har qanday JS xatosini OQ EKRAN o'rniga
     // ko'rinadigan xabarga aylantiradi. Telefonda konsol ko'rinmagani
     // uchun bu xatoni topishda yagona ishonchli usul.
@@ -457,6 +468,19 @@
       document.getElementById(id).classList.add("active");
       activeScreen = id;
       updateBackButton();
+      forceRepaint();
+    }
+
+    // Telegram WebView ba'zан yangi kontentni darhol CHIZMAYDI — ekran oq
+    // qoladi, faqat foydalanuvchi teginganда (scroll/tap) qayta chizadi.
+    // Quyidagi hiyla WebView'ni majburan repaint qilishga undaydi:
+    // body balandligini bir lahzaga "turtib" qo'yamiz.
+    function forceRepaint() {
+      const b = document.body;
+      b.style.display = "none";
+      // offsetHeight ni o'qish — brauzerni reflow qilishga majbur qiladi
+      void b.offsetHeight;
+      b.style.display = "";
     }
     function showError(msg) {
       document.getElementById("error-message").innerHTML = "❌ " + msg;
@@ -482,6 +506,14 @@
       // Telegram ichida ekanini belgilaymiz — HTML "orqaga" tugmalari
       // yashiriladi, ularning o'rniga native BackButton ishlaydi.
       document.body.classList.add("tg-inside");
+
+      // Viewport balandligi o'zgarganda (expand tugaganda) ekranni qayta
+      // chizamiz — birinchi yuklanishdagi "oq ekran" muammosini oldini oladi.
+      tg.onEvent?.("viewportChanged", forceRepaint);
+
+      // Qo'shimcha kafolat: yuklanishdan keyin bir necha bor repaint qilamiz,
+      // chunki WebView expand'ni turli vaqtda tugatishi mumkin.
+      [100, 400, 1000].forEach(ms => setTimeout(forceRepaint, ms));
 
       // Telegram BackButton bosilganda — bir qadam orqaga qaytamiz
       tg.BackButton?.onClick(() => {
