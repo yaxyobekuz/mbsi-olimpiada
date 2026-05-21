@@ -70,11 +70,24 @@ Mini App **HTTPS** manzilda bo'lishi shart. Bepul variantlar:
 
 1. [@BotFather](https://t.me/BotFather) → `/mybots` → botingiz → **Bot Settings**
 2. **Menu Button** (yoki **Configure Mini App**) → **Edit menu button URL**
-3. HTTPS manzilni kiriting (masalan `https://abc123.ngrok.io`)
+3. HTTPS manzilni kiriting (hozir: `https://olimpiada.mysrv.uz/`)
 
 Endi botni ochib pastdagi menyu tugmasini bossangiz Mini App ochiladi.
 
+> **Muhim — inline tugma uchun domen ro'yxatdan o'tishi shart.**
+> Bot har qanday xabarga javoban Mini App'ni ochuvchi `web_app` tugmasi
+> yuboradi. Bu tugma ishlashi uchun Mini App domeni BotFather'da
+> ro'yxatdan o'tgan bo'lishi kerak — yuqoridagi **Menu Button URL**
+> sozlangach, domen avtomatik tasdiqlanadi. URL `config.js` dagi
+> `WEBAPP_URL` bilan bir xil domenda bo'lishi shart.
+
 ## Qanday ishlaydi
+
+**Bot bilan boshlanishi:** ota-ona botga istalgan xabar yozsa, bot javoban
+"🏆 Reytingni ochish" tugmasini yuboradi — bu tugma Mini App'ni Telegram
+ichida ochadi.
+
+**Mini App ichida:**
 
 1. Mini App ochilganda `telegram-web-app.js` orqali imzolangan `initData` olinadi.
 2. Frontend `initData`'ni `/api/check-subscription` ga yuboradi.

@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import TelegramBot from "node-telegram-bot-api";
-import { CHANNELS, PORT } from "./config.js";
+import { CHANNELS, PORT, WEBAPP_URL } from "./config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -14,9 +14,36 @@ if (!BOT_TOKEN) {
   process.exit(1);
 }
 
-// polling: false - biz botni faqat API so'rovlari uchun ishlatamiz (getChatMember).
-// Bu rejada bot xabarlarni qabul qilmaydi, faqat Telegram API ga so'rov yuboradi.
-const bot = new TelegramBot(BOT_TOKEN, { polling: false });
+// polling: true - bot foydalanuvchi xabarlarini qabul qiladi. Har qanday
+// xabarga javoban Mini App'ni ochuvchi tugma yuboriladi (quyida).
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+
+// ---------------------------------------------------------------------------
+// Botga kelgan HAR QANDAY xabarga javoban Mini App'ni ochuvchi tugma yuborish.
+// web_app tugmasi Mini App'ni Telegram ichida ochadi (URL HTTPS bo'lishi shart).
+// ---------------------------------------------------------------------------
+bot.on("message", (msg) => {
+  const name = msg.from?.first_name || "Hurmatli ota-ona";
+  bot
+    .sendMessage(
+      msg.chat.id,
+      `Assalomu alaykum, ${name}!\n\n` +
+        `Farzandingiz olimpiada reytingini ko'rish uchun quyidagi tugmani bosing 👇`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "» 🏆 Reytingni ko'rish «", web_app: { url: WEBAPP_URL } }],
+          ],
+        },
+      },
+    )
+    .catch((err) => console.error("sendMessage xato:", err.message));
+});
+
+// Polling xatolarini log qilamiz (masalan, internet uzilishi)
+bot.on("polling_error", (err) => {
+  console.error("polling_error:", err?.message || err);
+});
 
 const app = express();
 app.use(express.json());
@@ -78,7 +105,7 @@ async function isMemberOf(channel, userId) {
     // Bot kanalda yo'q yoki kanal topilmadi - buni log qilamiz
     console.error(
       `getChatMember xato (${chatId}):`,
-      err?.response?.body?.description || err.message
+      err?.response?.body?.description || err.message,
     );
     return false;
   }
@@ -96,7 +123,8 @@ app.post("/api/check-subscription", async (req, res) => {
   if (!user || !user.id) {
     return res.status(401).json({
       ok: false,
-      error: "Telegram ma'lumotlari tasdiqlanmadi. Mini App ni Telegram orqali oching.",
+      error:
+        "Telegram ma'lumotlari tasdiqlanmadi. Mini App ni Telegram orqali oching.",
     });
   }
 
@@ -107,7 +135,7 @@ app.post("/api/check-subscription", async (req, res) => {
         title: ch.title,
         url: ch.url || `https://t.me/${ch.username}`,
         subscribed: await isMemberOf(ch, user.id),
-      }))
+      })),
     );
 
     const allSubscribed = results.every((c) => c.subscribed);
@@ -171,5 +199,7 @@ app.use(express.static(join(__dirname, "public")));
 
 app.listen(PORT, () => {
   console.log(`✅ Server ishga tushdi: http://localhost:${PORT}`);
-  console.log(`   Tekshiriladigan kanallar: ${CHANNELS.map((c) => "@" + c.username).join(", ")}`);
+  console.log(
+    `   Tekshiriladigan kanallar: ${CHANNELS.map((c) => "@" + c.username).join(", ")}`,
+  );
 });
