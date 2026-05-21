@@ -160,6 +160,9 @@
       margin-bottom: 12px;
     }
     .back-btn:active { opacity: 0.6; }
+    /* Telegram ichida orqaga qaytish native BackButton orqali bo'ladi —
+       HTML tugmasi yashiriladi (brauzer dev rejimida ko'rinib turadi). */
+    body.tg-inside .back-btn { display: none; }
     .search {
       width: 100%;
       background: var(--card); border: 1px solid var(--border);
@@ -386,20 +389,58 @@
   <script>
     const tg = window.Telegram?.WebApp;
 
+    // Hozir ko'rinib turgan ekran id si
+    let activeScreen = "screen-loading";
+
     // --- Ekran almashtirish yordamchisi ---
+    // Har bir ekran uchun "orqaga" qaysi ekranga qaytishi belgilangan.
+    // null bo'lsa — Telegram BackButton yashiriladi (eng birinchi ekran).
+    const BACK_TARGET = {
+      "screen-classes": null,        // 1-qadam — orqaga yo'q
+      "screen-students": "screen-classes",
+      "screen-profile": "screen-students",
+    };
+
     function showScreen(id) {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       document.getElementById(id).classList.add("active");
+      activeScreen = id;
+      updateBackButton();
     }
     function showError(msg) {
       document.getElementById("error-message").innerHTML = "❌ " + msg;
       showScreen("screen-error");
     }
 
+    // --- Telegram BackButton'ni joriy ekranga moslash ---
+    function updateBackButton() {
+      if (!tg?.BackButton) return;
+      // BACK_TARGET da nishon bo'lsa — tugmani ko'rsatamiz, aks holda yashiramiz
+      if (BACK_TARGET[activeScreen]) {
+        tg.BackButton.show();
+      } else {
+        tg.BackButton.hide();
+      }
+    }
+
     // --- Telegram WebApp ni sozlash ---
     if (tg) {
       tg.ready();
       tg.expand();
+
+      // Telegram ichida ekanini belgilaymiz — HTML "orqaga" tugmalari
+      // yashiriladi, ularning o'rniga native BackButton ishlaydi.
+      document.body.classList.add("tg-inside");
+
+      // Mini App header'ini har doim ko'k rangga bo'yaymiz
+      try { tg.setHeaderColor("#2563eb"); } catch (e) {}
+      // (eski Telegram versiyalarida bevosita rang qo'llab-quvvatlanmasligi mumkin)
+
+      // Telegram BackButton bosilganda — bir qadam orqaga qaytamiz
+      tg.BackButton?.onClick(() => {
+        const target = BACK_TARGET[activeScreen];
+        if (target) showScreen(target);
+      });
     }
 
     // Telegram tasdiqlash uchun initData (imzolangan satr)
