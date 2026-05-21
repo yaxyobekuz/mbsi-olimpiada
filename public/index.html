@@ -90,8 +90,26 @@
     }
     .channel-status.yes { background: var(--ok); color: #ffffff; }
     .channel-status.no { background: #e2e8f0; color: var(--muted); }
-    .channel-name { font-weight: 600; font-size: 0.95rem; }
-    .channel-name small { display: block; color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+    .channel-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      min-width: 0;
+      /* Title — bir qatorga sig'masa, uchta nuqta bilan kesiladi */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .channel-name small {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.78rem;
+      white-space: normal;
+      /* Desc — eng ko'pi 2 qator, ortig'i uchta nuqta bilan kesiladi */
+    }
     .btn {
       border: none;
       border-radius: 9px;
@@ -388,11 +406,20 @@
     const initData = tg?.initData || "";
 
     // --- DEV REJIMI ---------------------------------------------------
-    // URL ga ?dev=1 qo'shilsa, dizaynni brauzerda ko'rish uchun ishlaydi:
-    // obuna tekshiruvi o'tkazib yuboriladi, reyting to'g'ridan-to'g'ri
-    // ratings.json dan yuklanadi. Telegram ichida bu rejim hech qachon
-    // yoqilmaydi (URL da ?dev=1 bo'lmaydi).
-    const DEV_MODE = new URLSearchParams(location.search).get("dev") === "1";
+    // Dizaynni brauzerda ko'rish uchun (Telegram ichida bu rejim ishlamaydi):
+    //   ?dev=1     → obuna tekshiruvi o'tkazib yuboriladi, reyting ko'rsatiladi
+    //   ?dev=gate  → majburiy obuna sahifasi soxta kanallar bilan ko'rsatiladi
+    const DEV_PARAM = new URLSearchParams(location.search).get("dev");
+    const DEV_MODE = DEV_PARAM === "1";
+    const DEV_GATE = DEV_PARAM === "gate";
+
+    // ?dev=gate uchun namuna kanallar (haqiqiy obuna tekshirilmaydi)
+    const DEV_CHANNELS = [
+      { username: "kanal_birinchi", title: "Birinchi kanal",
+        url: "https://t.me/telegram", subscribed: true },
+      { username: "kanal_ikkinchi", title: "Ikkinchi kanal",
+        url: "https://t.me/telegram", subscribed: false },
+    ];
 
     // ===================================================================
     //  OBUNA TEKSHIRUVI
@@ -400,7 +427,13 @@
     async function checkSubscription() {
       showScreen("screen-loading");
 
-      // Dev rejimi: tekshiruvsiz to'g'ridan-to'g'ri reytingga o'tamiz
+      // Dev: obuna sahifasini soxta kanallar bilan ko'rsatish
+      if (DEV_GATE) {
+        renderGate(DEV_CHANNELS);
+        return;
+      }
+
+      // Dev: tekshiruvsiz to'g'ridan-to'g'ri reytingga o'tamiz
       if (DEV_MODE) {
         loadRatings();
         return;
@@ -410,7 +443,8 @@
         showError(
           "Mini App ni Telegram ilovasi orqali oching." +
           "<br><br><small style='color:var(--muted)'>" +
-          "Dizaynni brauzerda ko'rish uchun manzilga <b>?dev=1</b> qo'shing.</small>"
+          "Dizaynni brauzerda ko'rish: <b>?dev=1</b> (reyting) yoki " +
+          "<b>?dev=gate</b> (obuna sahifasi).</small>"
         );
         return;
       }
