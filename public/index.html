@@ -262,14 +262,31 @@
     // Telegram tasdiqlash uchun initData (imzolangan satr)
     const initData = tg?.initData || "";
 
+    // --- DEV REJIMI ---------------------------------------------------
+    // URL ga ?dev=1 qo'shilsa, dizaynni brauzerda ko'rish uchun ishlaydi:
+    // obuna tekshiruvi o'tkazib yuboriladi, reyting to'g'ridan-to'g'ri
+    // ratings.json dan yuklanadi. Telegram ichida bu rejim hech qachon
+    // yoqilmaydi (URL da ?dev=1 bo'lmaydi).
+    const DEV_MODE = new URLSearchParams(location.search).get("dev") === "1";
+
     // ===================================================================
     //  OBUNA TEKSHIRUVI
     // ===================================================================
     async function checkSubscription() {
       showScreen("screen-loading");
 
+      // Dev rejimi: tekshiruvsiz to'g'ridan-to'g'ri reytingga o'tamiz
+      if (DEV_MODE) {
+        loadRatings();
+        return;
+      }
+
       if (!initData) {
-        showError("Mini App ni Telegram ilovasi orqali oching.");
+        showError(
+          "Mini App ni Telegram ilovasi orqali oching." +
+          "<br><br><small style='color:var(--muted)'>" +
+          "Dizaynni brauzerda ko'rish uchun manzilga <b>?dev=1</b> qo'shing.</small>"
+        );
         return;
       }
 
@@ -341,20 +358,29 @@
     async function loadRatings() {
       showScreen("screen-loading");
       try {
-        const res = await fetch("/api/ratings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData }),
-        });
-        const data = await res.json();
+        let ratings;
 
-        if (!data.ok) {
-          // Obuna bekor qilingan bo'lsa — qayta tekshirishga qaytaramiz
-          showError(data.error || "Reytinglarni yuklab bo'lmadi.");
-          return;
+        if (DEV_MODE) {
+          // Dev rejimi: API ni chetlab o'tib, faylni to'g'ridan-to'g'ri o'qiymiz
+          const res = await fetch("/ratings.json");
+          if (!res.ok) throw new Error("ratings.json topilmadi");
+          ratings = await res.json();
+        } else {
+          const res = await fetch("/api/ratings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData }),
+          });
+          const data = await res.json();
+          if (!data.ok) {
+            // Obuna bekor qilingan bo'lsa — xato ko'rsatamiz
+            showError(data.error || "Reytinglarni yuklab bo'lmadi.");
+            return;
+          }
+          ratings = data.ratings;
         }
 
-        allStudents = data.ratings;
+        allStudents = ratings;
         initTabs();
         render();
         showScreen("screen-ratings");

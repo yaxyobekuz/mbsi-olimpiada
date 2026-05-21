@@ -157,6 +157,15 @@ app.post("/api/ratings", async (req, res) => {
   }
 });
 
+// ratings.json — faqat dev rejimi uchun (frontend ?dev=1 da shu yerdan o'qiydi).
+// Bu obuna tekshiruvini chetlab o'tadi, shuning uchun ishlab chiqishdagina ochiq.
+const DEV = process.env.NODE_ENV !== "production";
+if (DEV) {
+  app.get("/ratings.json", (_req, res) => {
+    res.sendFile(join(__dirname, "ratings.json"));
+  });
+}
+
 // Statik fayllar (Mini App)
 app.use(express.static(join(__dirname, "public")));
 
