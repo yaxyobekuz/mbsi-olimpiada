@@ -1,4 +1,4 @@
-# MBSI Olimpiada — Telegram Mini App
+# MBSI Olimpiada - Telegram Mini App
 
 Ota-onalar farzandlari reytingini ko'rishi uchun Telegram Mini App.
 Reytingni ko'rish uchun foydalanuvchi belgilangan **barcha kanallarga obuna** bo'lishi shart.
@@ -22,7 +22,7 @@ npm install
 
 ## Sozlash
 
-### 1. Kanallarni kiriting — `config.js`
+### 1. Kanallarni kiriting - `config.js`
 
 `CHANNELS` ro'yxatiga o'z kanallaringizni yozing (`@` belgisisiz):
 
@@ -33,11 +33,11 @@ export const CHANNELS = [
 ];
 ```
 
-> **Muhim:** Bot har bir kanalda **administrator** bo'lishi shart — aks holda
+> **Muhim:** Bot har bir kanalda **administrator** bo'lishi shart - aks holda
 > `getChatMember` obunani tekshira olmaydi. Kanal sozlamalari → Administratorlar →
 > botni qo'shing.
 
-### 2. Bot tokeni — `.env`
+### 2. Bot tokeni - `.env`
 
 ```
 BOT_TOKEN=sizning_bot_tokeningiz
@@ -51,20 +51,20 @@ npm start
 
 Server `http://localhost:3000` da ishlaydi.
 
-> Mini App'ni lokal brauzerda ochsangiz "Telegram orqali oching" xatosi chiqadi —
+> Mini App'ni lokal brauzerda ochsangiz "Telegram orqali oching" xatosi chiqadi -
 > bu normal holat. `initData` faqat Telegram ilovasi ichida mavjud bo'ladi.
 
 ## Telegram'ga ulash (deploy)
 
 Mini App **HTTPS** manzilda bo'lishi shart. Bepul variantlar:
 
-1. **Tezkor sinov uchun** — [ngrok](https://ngrok.com):
+1. **Tezkor sinov uchun** - [ngrok](https://ngrok.com):
    ```bash
    ngrok http 3000
    ```
    Bergan `https://...` manzilini quyida ishlatasiz.
 
-2. **Doimiy** — Render.com, Railway, VPS va h.k.
+2. **Doimiy** - Render.com, Railway, VPS va h.k.
 
 ### BotFather'da Mini App'ni ulash
 
@@ -88,6 +88,6 @@ Endi botni ochib pastdagi menyu tugmasini bossangiz Mini App ochiladi.
 
 ## Xavfsizlik eslatmalari
 
-- Obuna **har ikki** endpointda server tomonda tekshiriladi — frontendni chetlab o'tib bo'lmaydi.
+- Obuna **har ikki** endpointda server tomonda tekshiriladi - frontendni chetlab o'tib bo'lmaydi.
 - `initData` HMAC-SHA256 bilan tekshiriladi, 24 soatdan eski ma'lumot rad etiladi.
 - `.env` (bot tokeni) hech qachon git'ga qo'shilmaydi.

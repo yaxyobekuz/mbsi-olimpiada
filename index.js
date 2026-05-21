@@ -14,7 +14,7 @@ if (!BOT_TOKEN) {
   process.exit(1);
 }
 
-// polling: false — biz botni faqat API so'rovlari uchun ishlatamiz (getChatMember).
+// polling: false - biz botni faqat API so'rovlari uchun ishlatamiz (getChatMember).
 // Bu rejada bot xabarlarni qabul qilmaydi, faqat Telegram API ga so'rov yuboradi.
 const bot = new TelegramBot(BOT_TOKEN, { polling: false });
 
@@ -24,7 +24,7 @@ app.use(express.json());
 // ---------------------------------------------------------------------------
 // Telegram WebApp initData ni tekshirish (xavfsizlik).
 // Frontend yuborgan initData haqiqatan ham Telegram tomonidan imzolanganini
-// tekshiramiz — bunsiz har kim istalgan user_id ni soxtalashtirishi mumkin.
+// tekshiramiz - bunsiz har kim istalgan user_id ni soxtalashtirishi mumkin.
 // Hujjat: https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
 // ---------------------------------------------------------------------------
 function verifyInitData(initData) {
@@ -71,11 +71,11 @@ async function isMemberOf(channel, userId) {
   const chatId = channel.id || `@${channel.username}`;
   try {
     const member = await bot.getChatMember(chatId, userId);
-    // "member", "administrator", "creator" — obuna bo'lgan holatlar.
-    // "left", "kicked", "restricted" — obuna emas.
+    // "member", "administrator", "creator" - obuna bo'lgan holatlar.
+    // "left", "kicked", "restricted" - obuna emas.
     return ["member", "administrator", "creator"].includes(member.status);
   } catch (err) {
-    // Bot kanalda yo'q yoki kanal topilmadi — buni log qilamiz
+    // Bot kanalda yo'q yoki kanal topilmadi - buni log qilamiz
     console.error(
       `getChatMember xato (${chatId}):`,
       err?.response?.body?.description || err.message
@@ -137,7 +137,7 @@ app.post("/api/ratings", async (req, res) => {
   }
 
   try {
-    // Obunani server tomonida qayta tekshiramiz — frontendga ishonib bo'lmaydi
+    // Obunani server tomonida qayta tekshiramiz - frontendga ishonib bo'lmaydi
     const subscribed = (
       await Promise.all(CHANNELS.map((ch) => isMemberOf(ch, user.id)))
     ).every(Boolean);
@@ -157,7 +157,7 @@ app.post("/api/ratings", async (req, res) => {
   }
 });
 
-// ratings.json — faqat dev rejimi uchun (frontend ?dev=1 da shu yerdan o'qiydi).
+// ratings.json - faqat dev rejimi uchun (frontend ?dev=1 da shu yerdan o'qiydi).
 // Bu obuna tekshiruvini chetlab o'tadi, shuning uchun ishlab chiqishdagina ochiq.
 const DEV = process.env.NODE_ENV !== "production";
 if (DEV) {

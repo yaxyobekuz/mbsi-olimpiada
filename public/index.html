@@ -317,9 +317,6 @@
 </head>
 <body>
   <div class="container">
-    <h1>🏆 O'quvchilar reytingi</h1>
-    <p class="subtitle">MBSI olimpiada natijalari</p>
-
     <!-- 1. Yuklanish ekrani -->
     <div class="screen active" id="screen-loading">
       <div class="loading">
@@ -344,13 +341,15 @@
       <div class="error-box" id="error-message"></div>
     </div>
 
-    <!-- 4. Qadam 1 — Sinf tanlash -->
+    <!-- 4. Qadam 1 - Sinf tanlash -->
     <div class="screen" id="screen-classes">
+      <h1>🏆 O'quvchilar reytingi</h1>
+      <p class="subtitle">MBSI olimpiada natijalari</p>
       <p class="step-hint">1-qadam: farzandingiz sinfini tanlang</p>
       <div class="class-grid" id="class-grid"></div>
     </div>
 
-    <!-- 5. Qadam 2 — O'quvchi tanlash -->
+    <!-- 5. Qadam 2 - O'quvchi tanlash -->
     <div class="screen" id="screen-students">
       <button class="back-btn" id="back-to-classes">← Sinflar</button>
       <p class="step-hint" id="students-hint">2-qadam: o'quvchini tanlang</p>
@@ -359,7 +358,7 @@
       <div class="student-list" id="student-list"></div>
     </div>
 
-    <!-- 6. Qadam 3 — O'quvchi profili -->
+    <!-- 6. Qadam 3 - O'quvchi profili -->
     <div class="screen" id="screen-profile">
       <button class="back-btn" id="back-to-students">← O'quvchilar</button>
       <div id="profile-content"></div>
@@ -459,7 +458,7 @@
         </div>
       `).join("");
 
-      // "Obuna bo'lish" tugmalari — kanalni Telegram ichida ochish
+      // "Obuna bo'lish" tugmalari - kanalni Telegram ichida ochish
       list.querySelectorAll(".btn-join").forEach(btn => {
         btn.addEventListener("click", () => {
           const url = btn.dataset.url;
@@ -475,7 +474,7 @@
     document.getElementById("btn-recheck").addEventListener("click", checkSubscription);
 
     // ===================================================================
-    //  REYTING — 3 qadamli oqim: Sinf → O'quvchi → Profil
+    //  REYTING - 3 qadamli oqim: Sinf → O'quvchi → Profil
     // ===================================================================
     let allStudents = [];   // ratings.json dagi barcha o'quvchilar
     let currentSinf = "";   // tanlangan sinf
@@ -546,7 +545,7 @@
     // ===== QADAM 2: O'quvchilar =====
     function renderStudents() {
       document.getElementById("students-hint").textContent =
-        `${currentSinf} — o'quvchini tanlang`;
+        `${currentSinf} - o'quvchini tanlang`;
       document.getElementById("search").value = "";
       drawStudentList("");
       showScreen("screen-students");
@@ -560,7 +559,7 @@
         allStudents.filter(s => s.sinf === currentSinf)
       );
 
-      // Top 3 — ball bo'yicha; qolganlar — ism bo'yicha alifbo tartibida
+      // Top 3 - ball bo'yicha; qolganlar - ism bo'yicha alifbo tartibida
       const topThree = classStudents.slice(0, 3);
       const rest = classStudents
         .slice(3)
@@ -582,7 +581,7 @@
 
       statsEl.textContent = `${classStudents.length} ta o'quvchi`;
 
-      // 1-3 o'rin — medal/raqam bilan
+      // 1-3 o'rin - medal/raqam bilan
       const topRow = (s, rank) => `
         <div class="student-row" data-ism="${escapeHtml(s.ism)}">
           <span class="rank rank-${rank}">${rank}</span>
@@ -590,7 +589,7 @@
           <span class="chevron">›</span>
         </div>`;
 
-      // Qolganlar — o'rinsiz, alifbo tartibida
+      // Qolganlar - o'rinsiz, alifbo tartibida
       const plainRow = (s) => `
         <div class="student-row" data-ism="${escapeHtml(s.ism)}">
           <span class="student-name">${escapeHtml(s.ism)}</span>
@@ -624,16 +623,16 @@
       top: [
         "Ajoyib natija! Siz sinfingizning faxri va namunasisiz. Shu zaylda davom eting! 🌟",
         "Zo'r! Bunday yuqori natija mehnat va izchillik mevasidir. Tabriklaymiz! 🏆",
-        "Siz cho'qqidasiz! Endi vazifa — bu darajani saqlab qolish va boshqalarga ilhom berish. 🚀",
+        "Siz cho'qqidasiz! Endi vazifa - bu darajani saqlab qolish va boshqalarga ilhom berish. 🚀",
       ],
       mid: [
         "Yaxshi natija! Yana bir oz tirishqoqlik bilan eng oldingilar qatoriga qo'shilasiz. 💪",
         "To'g'ri yo'ldasiz! Har bir kichik qadam sizni cho'qqiga yaqinlashtiradi. ⬆️",
-        "Salohiyatingiz katta! Ozгina ko'proq harakat — va natija sezilarli o'sadi. ✨",
+        "Salohiyatingiz katta! Ozгina ko'proq harakat - va natija sezilarli o'sadi. ✨",
       ],
       low: [
-        "Har bir kashshof bir paytlar boshlang'ich nuqtada turgan. Asosiysi — to'xtamaslik! 🌱",
-        "Bugungi natija — ertangi o'sish uchun tayanch nuqta. Sizga ishonamiz! 🤝",
+        "Har bir kashshof bir paytlar boshlang'ich nuqtada turgan. Asosiysi - to'xtamaslik! 🌱",
+        "Bugungi natija - ertangi o'sish uchun tayanch nuqta. Sizga ishonamiz! 🤝",
         "Mag'lubiyat emas, balki tajriba. Mehnat bilan har qanday cho'qqi zabt etiladi! 💡",
       ],
     };
