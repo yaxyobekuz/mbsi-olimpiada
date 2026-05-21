@@ -19,6 +19,29 @@
       try { tg.ready(); } catch (e) {}
       try { tg.expand(); } catch (e) {}
     })();
+
+    // Global xato ushlagich — har qanday JS xatosini OQ EKRAN o'rniga
+    // ko'rinadigan xabarga aylantiradi. Telefonda konsol ko'rinmagani
+    // uchun bu xatoni topishda yagona ishonchli usul.
+    window.addEventListener("error", function (e) {
+      showFatal(e?.error?.stack || e?.message || "Noma'lum xato");
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      showFatal("Promise xatosi: " + (e?.reason?.stack || e?.reason || e));
+    });
+    function showFatal(text) {
+      let box = document.getElementById("fatal-error");
+      if (!box) {
+        box = document.createElement("pre");
+        box.id = "fatal-error";
+        box.style.cssText =
+          "white-space:pre-wrap;word-break:break-word;background:#fef2f2;" +
+          "color:#b91c1c;border:1px solid #dc2626;border-radius:10px;" +
+          "padding:14px;margin:20px 14px;font-size:12px;line-height:1.5;";
+        (document.body || document.documentElement).appendChild(box);
+      }
+      box.textContent = "⚠️ Xato:\n" + text;
+    }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -383,7 +406,7 @@
     <div class="screen" id="screen-classes">
       <h1>🏆 O'quvchilar reytingi</h1>
       <p class="subtitle">MBSI olimpiada natijalari</p>
-      <p class="step-hint"></p>
+      <p class="step-hint">1-qadam: farzandingiz sinfini tanlang</p>
       <div class="class-grid" id="class-grid"></div>
     </div>
 
@@ -402,6 +425,17 @@
       <div id="profile-content"></div>
     </div>
   </div>
+
+  <!-- VAQTINCHA DEBUG: ?debug=1 bo'lsa, telefonда konsol/xatolarni ko'rsatadigan
+       eruda paneli yuklanadi. Muammo topilgach bu blokni o'chiring. -->
+  <script>
+    if (new URLSearchParams(location.search).get("debug") === "1") {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/eruda";
+      s.onload = function () { window.eruda && window.eruda.init(); };
+      document.head.appendChild(s);
+    }
+  </script>
 
   <script>
     const tg = window.Telegram?.WebApp;
@@ -528,6 +562,11 @@
 
     // --- Obuna gate'ini chizish ---
     function renderGate(channels) {
+      // Himoya: channels noto'g'ri kelsa ham oq ekran chiqmasligi kerak
+      if (!Array.isArray(channels) || channels.length === 0) {
+        showError("Kanallar ro'yxati olinmadi. Keyinroq urinib ko'ring.");
+        return;
+      }
       const list = document.getElementById("channel-list");
       list.innerHTML = channels.map(ch => `
         <div class="channel">
@@ -558,8 +597,9 @@
       showScreen("screen-gate");
     }
 
-    // "Tekshirish" tugmasi
-    document.getElementById("btn-recheck").addEventListener("click", checkSubscription);
+    // "Tekshirish" tugmasi (element bo'lmasa skriptни to'xtatmaslik uchun ?.)
+    document.getElementById("btn-recheck")
+      ?.addEventListener("click", checkSubscription);
 
     // ===================================================================
     //  REYTING - 3 qadamli oqim: Sinf → O'quvchi → Profil
@@ -700,7 +740,7 @@
       });
     }
 
-    document.getElementById("search").addEventListener("input", e => {
+    document.getElementById("search")?.addEventListener("input", e => {
       drawStudentList(e.target.value.toLowerCase().trim());
     });
 
@@ -828,11 +868,11 @@
         </div>`;
     }
 
-    // --- Orqaga qaytish tugmalari ---
-    document.getElementById("back-to-classes").addEventListener("click", () => {
+    // --- Orqaga qaytish tugmalari (HTML; dev rejimida ko'rinadi) ---
+    document.getElementById("back-to-classes")?.addEventListener("click", () => {
       showScreen("screen-classes");
     });
-    document.getElementById("back-to-students").addEventListener("click", () => {
+    document.getElementById("back-to-students")?.addEventListener("click", () => {
       showScreen("screen-students");
     });
 
