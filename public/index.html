@@ -5,23 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>O'quvchilar reytingi</title>
   <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #3b82f6;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --accent: #2563eb;
+      --text: #0f172a;
+      --muted: #64748b;
       --gold: #fbbf24;
       --silver: #cbd5e1;
       --bronze: #d97706;
-      --border: #334155;
-      --danger: #ef4444;
-      --ok: #22c55e;
+      --border: #e2e8f0;
+      --danger: #dc2626;
+      --ok: #16a34a;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
+      font-family: "Inter", "Segoe UI", Tahoma, system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding: 20px 14px 40px;
@@ -82,8 +88,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 0.9rem; flex-shrink: 0;
     }
-    .channel-status.yes { background: var(--ok); color: #052e16; }
-    .channel-status.no { background: #475569; color: var(--muted); }
+    .channel-status.yes { background: var(--ok); color: #ffffff; }
+    .channel-status.no { background: #e2e8f0; color: var(--muted); }
     .channel-name { font-weight: 600; font-size: 0.95rem; }
     .channel-name small { display: block; color: var(--muted); font-weight: 400; font-size: 0.78rem; }
     .btn {
@@ -100,7 +106,7 @@
     .btn-join { background: var(--accent); color: #fff; }
     .btn-check {
       background: var(--ok);
-      color: #052e16;
+      color: #ffffff;
       width: 100%;
       padding: 13px;
       font-size: 1rem;
@@ -109,9 +115,9 @@
     .btn-joined { background: transparent; color: var(--ok); cursor: default; }
 
     .error-box {
-      background: rgba(239, 68, 68, 0.12);
+      background: #fef2f2;
       border: 1px solid var(--danger);
-      color: #fca5a5;
+      color: #b91c1c;
       border-radius: 10px;
       padding: 14px;
       text-align: center;
@@ -148,9 +154,11 @@
     table {
       width: 100%; border-collapse: collapse;
       background: var(--card); border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
     }
     thead th {
-      background: #15203a; padding: 12px 10px;
+      background: #f8fafc; padding: 12px 10px;
       font-size: 0.82rem; text-transform: uppercase;
       letter-spacing: 0.04em; color: var(--muted); text-align: center;
     }
@@ -160,8 +168,8 @@
       text-align: center; font-size: 0.95rem;
     }
     tbody td:nth-child(2) { text-align: left; font-weight: 500; }
-    tbody tr:hover { background: #25344f; }
-    tbody tr.highlight { background: rgba(59, 130, 246, 0.18); }
+    tbody tr:hover { background: #f1f5f9; }
+    tbody tr.highlight { background: #dbeafe; }
 
     .rank {
       display: inline-flex; align-items: center; justify-content: center;
